@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>房间选择</title>
+	<style type="text/css">
+		.ShowRoomBox
+		{
+			width: 728px;
+			height: 128px;
+			border-radius: 128px;
+			background-color:#fdcc39;
+			box-shadow: 1px 2px 4px rgba(1, 2, 2, 0.5);
+		}
+	</style>
+</head>
+<body>
+	<button onclick="ShowRoom()" style="width: 199px;height: 66px;position: absolute;top:10px;left: 25%;font-size: 30px;border-radius: 20px;">刷新</button>
+	<button onclick="OpenCreateRoomBox()" style="width: 199px;height: 66px;position: absolute;top:10px;left: 50%;font-size: 30px;border-radius: 20px;">创建房间</button>
+	<div id="CreateRoomBox" style="position: absolute;top:0px;left: 0px;width: 0%;height: 0%;opacity: 0;overflow: hidden;z-index: -999;">
+		<div style="position: absolute;top:0px;left: 0px;width: 100%;height: 100%;background-color: #000;opacity: 0.7;z-index: -1;"></div>
+		<div style="position: absolute;top:20%;left: 20%;width: 756px;height: 324px;background-color: #afe570;border-radius: 50px;">
+			<input type="text" id="EnterID" style="position: absolute;left:100px;top: 100px;">
+			<button onclick="CreateRoom()" style="width: 199px;height: 66px;position: absolute;top:130px;left: 200px;font-size: 30px;border-radius: 20px;">确认</button>
+			<button onclick="closeBox()" style="width: 80px;height: 80px;position: absolute;top:10px;right: 5px;font-size: 30px;border-radius: 50%;">X</button>
+		</div>
+	</div>
+	<div id="ShowRoomBox">
+		<!--<div class="ShowRoomBox" style="position: absolute;top:100px;left: 20%;">
+			<font style="position: absolute;top:10px;left: 30px;font-size: 30px;">房间ID:1223</font>
+			<font style="position: absolute;top:45px;left: 30px;font-size: 30px;">玩家1:hhx</font>
+			<font style="position: absolute;top:80px;left: 30px;font-size: 30px;">玩家2:sx</font>
+			<font style="position: absolute;top:10px;left: 300px;font-size: 30px;">状态:游戏中...</font>
+			<button onclick="GoRoom()" style="position: absolute;top:65px;left: 300px;font-size: 30px;border-radius: 20px;">加入>></button>
+		</div>-->
+	</div>
+	<script type="text/javascript" src="./js/logon.js"></script>
+	<script src="./axios-1.x/dist/axios.min.js"></script>
+	<script type="text/javascript">
+		window.severURL="http://192.168.1.3:3100";
+		var DecisionNum=0;
+		window.PlayerID="";
+		var cookieText="";//用于存储房间id设置
+		var roomID=[];
+        var roomPlayer1=[];
+        var roomPlayer2=[];
+		/*当前房间展示*/
+		async function ShowRoom()
+		{
+			var q=100;
+			var a=0;
+			document.getElementById('ShowRoomBox').innerHTML="";
+			const res = await axios({
+				url:window.severURL+'/getRoomInfor',
+				method:'get',
+				})
+			for (var i = 0; i < res.data.num; i++) 
+			{
+				roomID[i]=res.data.ID[i];
+				roomPlayer1[i]=res.data.roomPlayer1[i];
+				roomPlayer2[i]=res.data.roomPlayer2[i];
+				var ID="<font style='position: absolute;top:10px;left: 30px;font-size: 30px;'>房间ID:"+roomID[i]+"</font>";
+				var P1="<font style='position: absolute;top:45px;left: 30px;font-size: 30px;'>玩家1:"+roomPlayer1[i]+"</font>";
+				var P2="<font style='position: absolute;top:80px;left: 30px;font-size: 30px;'>玩家2:"+roomPlayer2[i]+"</font>";
+				var Now="";
+				if(roomPlayer1[i]!=""&&roomPlayer2[i]!="")
+				{Now="<font style='position: absolute;top:10px;left: 300px;font-size: 30px;'>状态:游戏中...</font>";}else{Now="<font style='position: absolute;top:10px;left: 300px;font-size: 30px;'>状态:可加入</font><button onclick='GoRoom("+i+")' style='position: absolute;top:65px;left: 300px;font-size: 30px;border-radius: 20px;'>加入>></button>";}
+				document.getElementById('ShowRoomBox').innerHTML+="<div class='ShowRoomBox' style='position: absolute;top:"+q+"px;left: 20%;'>"+ID+P1+P2+Now+"</div></div>";
+				q+=190;
+			}
+			for (var i = 0; i < roomID.length; i++)
+					{
+						//console.log("1");
+						a+=1;
+						if(readRoomIDCookie()==roomID[i]&&readRoomIDCookie()!=0){window.open("./index.html","_self");return 1;}
+					}
+			if(a==roomID.length)deleteRoomCookie();
+		}
+		/*加入房间*/
+		function GoRoom(num) 
+		{
+			cookieText=roomID[num];
+			setRoomCookie();
+			window.open("./index.html","_self");
+		}
+		/*打开创建房间盒子*/
+		function OpenCreateRoomBox()
+		{
+			document.getElementById('CreateRoomBox').style="position: absolute;top:0px;left: 0px;width: 100%;height: 100%;opacity: 1;overflow: hidden;z-index: 999;"
+		}
+		function closeBox()
+		{
+			document.getElementById('CreateRoomBox').style="position: absolute;top:0px;left: 0px;width: 0%;height: 0%;opacity: 0;overflow: hidden;z-index: -999;"
+		}
+		/*创建房间*/
+		async function CreateRoom()
+		{
+			ShowRoom();
+			var a=0;
+			var IDtext=document.getElementById('EnterID').value;
+			console.log(IDtext);
+			for (var i = 0; i < roomID.length; i++)
+			{if(IDtext!=roomID[i]){a+=1}else{break;}}
+			if(a==roomID.length&&IDtext!="")
+			{
+				const res = await axios({
+				url:window.severURL+'/CreateRoom',
+				method:'get',
+				params:
+		        {
+		            roomID:IDtext
+		        }
+				})
+		        if(res.data.return)
+		        {
+		        	cookieText=IDtext;
+		        	setRoomCookie();
+		        	window.open("./index.html","_self");
+		        }
+			}
+			else
+			{
+				alert("抱歉，该房间ID已存在或输入ID为空请更改");
+			}
+			
+		}
+		/*载入后自动登录*/
+		AutomaticLogOn();
+		/*cookie部分*/
+		/*设置 Cookie*/
+        function setRoomCookie() {
+            document.cookie = "roomID="+cookieText+";max-age=604800;path=/";
+        }
+        /*删除 Cookie*/
+        function deleteRoomCookie() {
+            document.cookie = "roomID=;max-age=0;path=/";
+        }
+        /*读取cookie中的房间信息*/
+        function readRoomIDCookie() 
+        {
+		  var cookies = document.cookie.split("; ");
+		  for (var i = 0; i < cookies.length; i++) {
+		    var cookie = cookies[i].split("=");
+		    var cookieName = cookie[0];
+		    var cookieValue = cookie[1];
+		    if (cookieName === "roomID") {
+		      console.log("roomID 的值为: " + cookieValue);
+		      return cookieValue;
+		    }
+		  }
+		  return 0;
+		}
+		/*自动登录后调用的初始化函数，禁止占用该函数名！*/
+		window.InitFunction=async function()
+		{
+			if(window.PlayerID!="")
+			{
+				ShowRoom();
+			}
+		}
+	</script>
+</body>
+</html>

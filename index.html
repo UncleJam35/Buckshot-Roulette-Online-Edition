@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>对决！</title>
+		<style>
+			body { margin: 0; }
+			canvas{position: absolute;top:10%;left: 20%;z-index: 2;}
+			.mainBox
+			{
+				width: 820px;
+				height: 460px;
+			}
+			.ShowButtonBox
+			{
+				width: 70px;
+				height: 70px;
+				border: none;
+				background: none;
+				cursor: pointer;
+				border-radius: 50%;
+				background-color: #FFF;
+				transition-duration: 0.3s;
+			}
+			.ShowHPBox
+			{
+				width: 205px;
+				height: 40px;
+				overflow: hidden;
+			}
+		</style>
+		<script type="importmap">
+		  {
+		    "imports": {
+		      "three": "./nodejs/node_modules/three/build/three.module.js",
+		      "three/addons/": "./nodejs/node_modules/three/examples/jsm/"
+		    }
+		  }
+		</script>
+	</head>
+	<body>
+		<!--游戏交互区-->
+		<audio name="BulletAudio" src="./audio/false.mp3"></audio><!--假子弹-->
+		<audio name="BulletAudio" src="./audio/true.mp3"></audio><!--真子弹-->
+		<button onclick="outRoom()" style="position: absolute;top:10px;right: 10px;width: 168px;height: 65px;border-radius: 50px;font-size: 30px;">退出房间</button><!--退出房间按键-->
+		<div class="mainBox" style="position: absolute;top:10%;left: 20%;z-index: 3;">
+			<!--初始化提示框-->
+			<div id="promptBox" style="position: absolute;top:20px;left:30px;width: 90%;height: 90%;overflow: hidden;z-index: 999;opacity: 1;z-index: 999;background-color: #FFF">
+				<font style="position: absolute;top:20%;left:20%;font-size: 50px;">场景初始化中...</font>
+				<font style="position: absolute;top:40%;left:5%;font-size: 50px;">若本框消失场景还未加载完成或血量错误请刷新页面</font>
+			</div>
+			<!--攻击目标选择-->
+			<button name="fireButton" class="ShowButtonBox" onclick="submitMyDecision(2)" style="position: absolute;top:150px;left: 30px;opacity: 0;">自己</button>
+			<button name="fireButton" class="ShowButtonBox" onclick="submitMyDecision(1)" style="position: absolute;top:50px;left: 30px;opacity: 0;">对方</button>
+			<!--血量显示-->
+			<div class="ShowHPBox" style="position: absolute;top:2px;left: 612px;">
+				<font style="position: absolute;top:1px;left: 0px;font-size: 30px;color: #FFF;">你:</font>
+				<div name="HPshow">
+					<img src="image/HP.png" width="40px" height="40px" style="position: absolute;top:5px;left: 31px;">
+					<img src="image/HP.png" width="40px" height="40px" style="position: absolute;top:5px;left: 51px;">
+				</div>
+			</div>
+			<div class="ShowHPBox" style="position: absolute;top:50px;left: 612px;">
+				<font style="position: absolute;top:1px;left: 0px;font-size: 30px;color: #FFF;">他:</font>
+				<div name="HPshow">
+					<img src="image/HP.png" width="40px" height="40px" style="position: absolute;top:5px;left: 31px;">
+					<img src="image/HP.png" width="40px" height="40px" style="position: absolute;top:5px;left: 51px;">
+				</div>
+			</div>
+			<!--子弹展示-->
+			<div id="TFshow" style="position: absolute;top:60px;left: 90px;width: 0px;height: 0px;background-color: #FFF;z-index: -10;opacity:0;">
+				<!--<img src="./image/TB.png" width="90px" height="160px" style="position: absolute;top:50px;left: 20px;">-->
+			</div>
+		</div>
+		<!--JS区-->
+		<script type="module" src="./main.js"></script>
+		<script type="text/javascript" src="./js/logon.js"></script>
+		<script type="text/javascript" src="./axios-1.x/dist/axios.min.js"></script>
+		<script type="text/javascript">
+			window.severURL="http://192.168.1.3:3100";
+			var DecisionNum=0;
+			var round=0;
+			window.PlayerID="";
+			var RoomID="";
+			async function giveRivalDecision()//获取对手的选择
+			{
+				const res = await axios({
+		            	url:window.severURL+'/play',
+		            	method:'get',
+		            	params:
+		            	{
+		            		room:RoomID,
+		            		Player:PlayerID
+		            	}
+		        	})
+				if(res.data.error==1){window.open("./room.html","_self");};
+				if(DecisionNum!=res.data.return)//盘点动作是否改变
+					{
+						DecisionNum=res.data.return;
+						if(res.data.return<10)YouShootGun(res.data.return,res.data.type);
+						if(res.data.return>=10)HeUseProp(res.data.return-10,res.data.type);
+					}
+			}
+			async function givePropInfor()//获取道具信息
+			{
+				var tab;
+				for (var i = 0; i < 4; i++)
+				{
+					MyCell[i]=0;HeCell[i]=0;
+				}
+				const res = await axios({
+		            	url:window.severURL+'/givePropInfor',
+		            	method:'get',
+		            	params:
+		            	{
+		            		room:RoomID,
+		            		Player:PlayerID
+		            	}
+		        	})
+				if(res.data.error==1){window.open("./room.html","_self");return 0;};
+				for (var i = 0; i < 4;) 
+				{
+					tab=await PropPlace(res.data.MyProp[i].type);
+					i+=tab;
+					console.log("1");
+				}
+				for (var i = 0; i < 4;) 
+				{
+					tab=await HePropPlace(res.data.HeProp[i].type);
+					i+=tab;
+					console.log("1");
+				}
+			}
+			window.submitMyUseProp=async function(num)//上传我使用的道具
+			{
+				const res = await axios({
+		            	url:window.severURL+'/submitMyDecision',
+		            	method:'get',
+		            	params:
+		            	{
+		            		room:RoomID,
+		            		Player:PlayerID,
+		            		decision:num+10,
+		            		PropNum:num
+		            	}
+		        	})
+				if(res.data.return){MyUseProp(num);}else{alert("本回合不是你的回合哟！");}
+				if(num+10!=0){setTimeout(function() 
+					{
+						submitMyDecision(0);
+					}, 300);}
+				
+				//alert(res.data.return)
+			}
+			window.submitMyDecision=async function(num)//上传我的选择
+			{
+				const res = await axios({
+		            	url:window.severURL+'/submitMyDecision',
+		            	method:'get',
+		            	params:
+		            	{
+		            		room:RoomID,
+		            		Player:PlayerID,
+		            		decision:num
+		            	}
+		        	})
+				if(res.data.return)//判断回合是否有效
+					{
+						MeShootGun(num,res.data.type);
+					}else{alert("本回合不是你的回合哟！");}
+				if(num!=0)
+				{
+					setTimeout(function() {submitMyDecision(0);}, 300);
+				}
+			}
+			
+			/*获取血量*/
+			window.giveHP=async function()
+			{
+				const res = await axios({
+		            	url:window.severURL+'/giveHP',
+		            	method:'get',
+		            	params:
+		            	{
+		            		room:RoomID,
+		            		Player:PlayerID
+		            	}
+		        	})
+				document.getElementsByName("HPshow")[0].innerHTML="";
+				document.getElementsByName("HPshow")[1].innerHTML="";
+				console.log("本地回合为"+round+"；服务器返回回合为"+res.data.round);
+				if(res.data.round>=2&&round!=res.data.round)
+				{
+					console.log("执行");
+					round=res.data.round;
+					givePropInfor();
+					//判断是否为第二回合及以上
+				}
+				var q=31;
+				for (var i = 0; i < res.data.MyHP; i++)
+				{
+					document.getElementsByName("HPshow")[0].innerHTML+="<img src='image/HP.png' width='40px' height='40px' style='position: absolute;top:5px;left: "+q+"px;'>"
+					q+=20;
+				}
+				if(res.data.MyHP<=0){alert("你无了");outRoom();return 0;}
+				q=31;
+				for (var i = 0; i < res.data.HeHP; i++)
+				{
+					document.getElementsByName("HPshow")[1].innerHTML+="<img src='image/HP.png' width='40px' height='40px' style='position: absolute;top:5px;left: "+q+"px;'>"
+					q+=20;
+				}
+				if(res.data.HeHP<=0){alert("你赢了");outRoom();return 0;}
+					/*子弹更新*/
+						if(res.data.FB!=0||res.data.TB!=0)
+						{
+							document.getElementById('TFshow').innerHTML="";
+							var q=20;
+							document.getElementById('TFshow').style="position: absolute;top:60px;left: 90px;width: 674px;height: 331px;background-color: #FFF;z-index: 10;opacity: 1;";
+							for (var i = 0; i < res.data.TB; i++) 
+							{
+								document.getElementById('TFshow').innerHTML+="<img src='./image/TB.png' width='80px' height='140px' style='position: absolute;top:10px;left: "+q+"px;'>"
+								q+=100;
+							}
+							q=20;
+							for (var i = 0; i < res.data.FB; i++) 
+							{
+								document.getElementById('TFshow').innerHTML+="<img src='./image/FB.png' width='80px' height='140px' style='position: absolute;top:170px;left: "+q+"px;'>"
+								q+=100;
+							}
+							setTimeout(function() {
+								document.getElementById('TFshow').innerHTML="";
+								document.getElementById('TFshow').style="position: absolute;top:0px;left: 0px;width: 0px;height: 0px;background-color: #FFF;z-index: -10;opacity: 0;";
+							}, 3000);
+						}
+						else
+						{
+							document.getElementById('TFshow').innerHTML="";
+								document.getElementById('TFshow').style="position: absolute;top:0px;left: 0px;width: 0px;height: 0px;background-color: #FFF;z-index: -10;opacity: 0;";
+						}
+			}
+			/*退出房间函数*/
+			async function outRoom()
+			{
+				const res = await axios({
+		            	url:window.severURL+'/DeleteRoom',
+		            	method:'get',
+		            	params:
+		            	{
+		            		room:RoomID,
+		            		Player:PlayerID
+		            	}
+		        	})
+				if(res.data.return==1)
+				{
+					deleteRoomCookie();
+					window.open("./room.html","_self");
+				}
+			}
+			/*登陆成功后自动加入房间*/
+			async function JoinRoom()
+			{
+				const res = await axios({
+		            	url:window.severURL+'/JoinRoom',
+		            	method:'get',
+		            	params:
+		            	{
+		            		room:RoomID,
+		            		Player:PlayerID
+		            	}
+		        	})
+				if(res.data.return!=0)
+					{
+						setTimeout(function() {
+							giveHP();
+							setInterval(giveRivalDecision,100);
+							document.getElementById("promptBox").style="position: absolute;top:0px;left:0px;width: 0%;height: 0%;overflow: hidden;z-index: -999;opacity: 0;background-color: #FFF";
+
+							document.getElementById("promptBox").innerHTML="";
+						}, 10000);		
+					}else{deleteRoomCookie();window.open("./room.html","_self");}		
+			}
+			/*读取cookie中的用户信息*/
+	        function readRoomIDCookie() 
+	        {
+			  var cookies = document.cookie.split("; ");
+			  for (var i = 0; i < cookies.length; i++) 
+			  {
+			    var cookie = cookies[i].split("=");
+			    var cookieName = cookie[0];
+			    var cookieValue = cookie[1];
+			    if (cookieName === "roomID") {
+			    	RoomID=cookieValue;
+			      console.log("roomID 的值为: " + cookieValue);
+			      return cookieValue;
+			    }
+			  }
+			  return 0;
+			}
+			/*删除 Cookie*/
+	        function deleteRoomCookie() {
+	            document.cookie = "roomID=;max-age=0;path=/";
+	        }
+			/*载入后自动登录*/
+			AutomaticLogOn();
+			window.InitFunction=async function()
+			{
+				if(readRoomIDCookie()!=0)
+				{
+					JoinRoom();
+				}
+				else
+				{
+					window.open("./room.html","_self");
+				}
+			}
+			
+		</script>
+	</body>
+</html>
