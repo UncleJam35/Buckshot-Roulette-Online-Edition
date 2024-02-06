@@ -13,7 +13,7 @@
 # 游戏视频(game video)
 
 
-https://github.com/UncleJam35/Buckshot-Roulette-Online-Edition/assets/60509553/1babb98d-0d78-43f7-9084-dcce980df244
+https://github.com/UncleJam35/Buckshot-Roulette-Online-Edition/assets/60509553/bce0d5ac-602a-4ba1-b199-2385a67ee49a
 
 
 # 本项目使用的技术
