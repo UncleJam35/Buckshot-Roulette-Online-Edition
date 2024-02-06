@@ -6,6 +6,7 @@
 当你安装好nodejs以及hfs后，首先先打开hfs将项目文件夹拖入hfs并选择“真实目录”，然后查看hfs给出的IP地址(若是放在服务器上则可在左上角选择IP地址查看官网IP),
 记住这个IP地址，现在我们对index.html、room.html、以及logon目录下的index.html进行编辑，将这3个文件中的"JS区"内的"window.severURL="http://192.168.1.3:3100";"中的
 "192.168.1.3"改为你刚刚在hfs得到的IP地址，然后保存。
+解下打开命令行窗口(windows使用cmd)，在命令行中cd到nodejs的目录，然后使用node main命令启动文件即可
 完成以上步骤后，接下来你就可以在浏览器中打开在hfs里提供的链接了，请注意一定是通过hfs提供的链接打开而不是直接双击本地index.html文件，因为这样会导致threejs无法加载并且无法使用cookie。
 您可以观看项目中的“部署视频(Installation instructional video).mp4”了解具体操作
 # 如何游玩
