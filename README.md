@@ -7,8 +7,15 @@
 记住这个IP地址，现在我们对index.html、room.html、以及logon目录下的index.html进行编辑，将这3个文件中的"JS区"内的"window.severURL="http://192.168.1.3:3100";"中的
 "192.168.1.3"改为你刚刚在hfs得到的IP地址，然后保存。
 完成以上步骤后，接下来你就可以在浏览器中打开在hfs里提供的链接了，请注意一定是通过hfs提供的链接打开而不是直接双击本地index.html文件，因为这样会导致threejs无法加载并且无法使用cookie。
+您可以观看项目中的“部署视频(Installation instructional video).mp4”了解具体操作
 # 如何游玩
 当你完成部署后，只需要正常打开然后登录即可，登录后会跳转到room.html，你可以选择创建一个房间并让你的好友或者加入一个由您的好友创建的存在的房间，然后就可以游玩了！
+# 游戏视频(game video)
+
+
+https://github.com/UncleJam35/Buckshot-Roulette-Online-Edition/assets/60509553/1babb98d-0d78-43f7-9084-dcce980df244
+
+
 # 本项目使用的技术
 1.本项目使用到了Nodejs来提供后台支持
 其中nodejs文件夹中的main文件用来配置端口以及调用其他文件，infor文件中编写的各个路由函数用于接收玩家的房间加入请求、操作请求、对方操作请求、血量请求、子弹数量请求等。比如当玩家加入房间时infor文件会匹配玩家提供的房间ID是否存在于jsonFile中的play.json中。当玩家改变操作时也会修改play.json中的该玩家数组下的decision值供对方参考。
