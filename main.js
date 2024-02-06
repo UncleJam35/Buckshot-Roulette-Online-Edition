@@ -379,6 +379,8 @@ window.MeShootGun = function(num,type)
 	switch(num)
 	{
 	case 1:
+			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mousedown',handleMouseDown);
 			//submitMyDecision(0);
 			/*第1步*/
 			GunEnd=[1,1,-4];//xyz
@@ -399,11 +401,13 @@ window.MeShootGun = function(num,type)
 				/*第4步*/
 				GunEnd=[-2,1,-6.5];
 				GunAngle=[0, 0.3, -1.5];
-				document.addEventListener('mousemove',handleMouseMove);
+				//document.addEventListener('mousemove',handleMouseMove);
 				giveHP();
 			}, 1500);
 		break;
 	case 2:
+			document.removeEventListener('mousemove', handleMouseMove);			
+			document.removeEventListener('mousedown',handleMouseDown);
 			/*第1步*/
 			GunEnd=[0,1,-2];//xyz
 			GunAngle=[0, 3.2, 0];//xyz
@@ -424,6 +428,7 @@ window.MeShootGun = function(num,type)
 				GunEnd=[-2,1,-6.5];
 				GunAngle=[0, 0.3, -1.5];
 				document.addEventListener('mousemove',handleMouseMove);
+				document.addEventListener('mousedown',handleMouseDown);
 				giveHP();
 			}, 1500);
 	break;
@@ -435,6 +440,8 @@ window.YouShootGun =function(num,type)
 	switch(num)
 	{
 	case 1:
+		document.removeEventListener('mousemove', handleMouseMove);
+		document.removeEventListener('mousedown',handleMouseDown);
 		/*第1步*/
 		GunEnd=[0,1,-5];//xyz
 		GunAngle=[-0.2, 3.2, 0];//xyz
@@ -456,10 +463,13 @@ window.YouShootGun =function(num,type)
 			GunAngle=[0, 0.3, -1.5];
 			//MeShootGun();
 			document.addEventListener('mousemove',handleMouseMove);
+			document.addEventListener('mousedown',handleMouseDown);
 			giveHP();
 		}, 1800);
 	break;
 	case 2:
+		document.removeEventListener('mousemove', handleMouseMove);
+		document.removeEventListener('mousedown',handleMouseDown);
 		/*第1步*/
 		GunEnd=[0,0,-9];//xyz
 		GunAngle=[-0.2, 0, 0];//xyz
@@ -480,7 +490,7 @@ window.YouShootGun =function(num,type)
 			GunEnd=[-2,1,-6.5];
 			GunAngle=[0, 0.3, -1.5];
 			//MeShootGun();
-			document.addEventListener('mousemove',handleMouseMove);
+			//document.addEventListener('mousemove',handleMouseMove);
 			giveHP();
 		}, 1800);
 	break;
@@ -494,6 +504,7 @@ window.MyUseProp=function(num,type)
 		if(MyCell[num]==bulletModel[i])
 		{
 			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mousedown',handleMouseDown);
 			/*第1步*/
 			GunEnd=[1,1,-4];//xyz
 			GunAngle=[0, 0, 0];//xyz
@@ -523,7 +534,7 @@ window.MyUseProp=function(num,type)
 				/*第5步*/
 				GunEnd=[-2,1,-6.5];
 				GunAngle=[0, 0.3, -1.5];
-				document.addEventListener('mousemove',handleMouseMove);
+				//document.addEventListener('mousemove',handleMouseMove);
 				giveHP();
 			}, 2000);
 		}
@@ -533,8 +544,8 @@ window.MyUseProp=function(num,type)
 	{
 		if(MyCell[num]==dreak[i])
 		{
-			document.removeEventListener('mousemove', handleMouseMove);
-			
+			document.removeEventListener('mousemove', handleMouseMove);	
+			document.removeEventListener('mousedown',handleMouseDown);
 			MyCellNumber=num;
 			dreak[i]=1;
 			MyPropEnd=[0, 3, 2];
@@ -548,6 +559,7 @@ window.MyUseProp=function(num,type)
 			}, 1000);
 			setTimeout(function() {
 				document.addEventListener('mousemove',handleMouseMove);
+				document.addEventListener('mousedown',handleMouseDown);
 				giveHP();
 			}, 1500);
 			break;
@@ -561,7 +573,8 @@ window.HeUseProp=function(num,type)
 	{
 		if(HeCell[num]==bulletModel[i])
 		{
-			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mousemove', handleMouseMove);			
+			document.removeEventListener('mousedown',handleMouseDown);
 			/*第1步*/
 			GunEnd=[0,1,-5];//xyz
 			GunAngle=[-0.2, 3.2, 0];//xyz
@@ -592,6 +605,7 @@ window.HeUseProp=function(num,type)
 				GunEnd=[-2,1,-6.5];
 				GunAngle=[0, 0.3, -1.5];
 				document.addEventListener('mousemove',handleMouseMove);
+				document.addEventListener('mousedown',handleMouseDown);
 				giveHP();
 			}, 2000);
 		}
@@ -602,7 +616,7 @@ window.HeUseProp=function(num,type)
 		if(HeCell[num]==dreak[i])
 		{
 			document.removeEventListener('mousemove', handleMouseMove);
-			
+			document.removeEventListener('mousedown',handleMouseDown);
 			HeCellNumber=num;
 			//dreak[i]=1;
 			HePropEnd=[0, 3, -8];
@@ -615,7 +629,7 @@ window.HeUseProp=function(num,type)
 				
 			}, 1000);
 			setTimeout(function() {
-				document.addEventListener('mousemove',handleMouseMove);
+				//document.addEventListener('mousemove',handleMouseMove);
 				giveHP();
 			}, 1500);
 			break;
